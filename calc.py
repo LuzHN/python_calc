@@ -43,12 +43,27 @@ def t_error(t):
 
 lexer = lex.lex()
 
+precedence = (
+
+    ('left','PLUS','MINUS'),
+    ('left', 'MULTIPLY','DIVIDE')
+
+)
+
 def p_calc(p):
     '''
-    calc : expression 
+    calc : expression
+            | var_assign
             | empty
     '''
-    print(p[1])
+    print(run(p[1]))
+
+def p_var_assign(p):
+
+    '''
+    var_assign : NAME EQUALS expression
+    '''
+    p[0] = ('=', p[1], p[3])
 
 def p_expression(p):
     '''
@@ -67,6 +82,16 @@ def p_expression_int_float(p):
     '''
     p[0] = p[1]
 
+def p_expression_int_var(p):
+    '''
+    expression : NAME
+    '''
+    p[0] = ('var', p[1])
+
+def p_error(p):
+
+    print("Syntax Error found.")
+
 def p_empty(p):
     '''
     empty :
@@ -75,9 +100,23 @@ def p_empty(p):
 
 parser = yacc.yacc()
 
+def run(p):
+
+    if type(p) == tuple:
+        if p[0] == '+':
+            return run(p[1]) + run(p[2])
+        elif p[0] == '-':
+            return run(p[1]) - run(p[2])
+        elif p[0] == '*':
+            return run(p[1]) * run(p[2])
+        elif p[0] == '/':
+            return run(p[1]) / run(p[2])
+    else:
+        return p
+
 while True:
     try:
-        s = input('')
+        s = input('>> ')
     except EOFError:
         break
     parser.parse(s)
