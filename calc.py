@@ -99,9 +99,9 @@ def p_empty(p):
     p[0] = None
 
 parser = yacc.yacc()
-
+env = {}
 def run(p):
-
+    global env
     if type(p) == tuple:
         if p[0] == '+':
             return run(p[1]) + run(p[2])
@@ -111,6 +111,14 @@ def run(p):
             return run(p[1]) * run(p[2])
         elif p[0] == '/':
             return run(p[1]) / run(p[2])
+        elif p[0] == '=':
+            env[p[1]] = run(p[2])
+        elif p[0] == 'var':
+            if p[1] not in env:
+                return 'Undeclared variable found'
+            else:
+                return env[p[1]]
+
     else:
         return p
 
